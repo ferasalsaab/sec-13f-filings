@@ -18,7 +18,11 @@ class SecClient
     )
 
     FileUtils.mkdir_p(File.dirname(filename))
-    Down.download(url, destination: filename)
+    Down.download(
+      url,
+      destination: filename,
+      headers: { "User-Agent" => ENV.fetch("SEC_USER_AGENT") }
+    )
 
     thirteen_fs = []
     col_names = nil
