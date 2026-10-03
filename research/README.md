@@ -66,3 +66,37 @@ Measures include:
 The effective manager count represents the number of equally sized managers that would produce the observed HHI. It is a concentration statistic, not a literal count of independent institutions.
 
 Concentration is measured at the 13F reporting-entity level. Related reporting entities may belong to the same parent institution.
+
+## Report 03 — Manager Universe
+
+Research question:
+
+> Who are the institutions controlling observable capital, where do they rank, and which managers belong in the research universe?
+
+Run:
+
+    bundle exec rails runner research/reports/03_manager_universe.rb YEAR QUARTER
+
+Example:
+
+    bundle exec rails runner research/reports/03_manager_universe.rb 2026 2
+
+Outputs:
+
+- full manager universe
+- Core 500
+- Top 100
+- Top 25
+
+Research-universe hierarchy:
+
+- Extreme Capital Core: Top 25
+- Major Capital: ranks 26–100
+- Core Capital: ranks 101–500
+- Institutional: >= $10B outside Top 500
+- Extended: >= $1B
+- Full: remaining managers
+
+Capital importance must not be interpreted as investment signal quality.
+
+Holdings availability is explicitly distinguished from portfolio structure. A manager whose detailed holdings have not been materialised is NOT_LOADED rather than a zero-position portfolio.
