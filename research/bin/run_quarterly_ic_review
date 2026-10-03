@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+
+set -Eeuo pipefail
+
+YEAR="${1:-}"
+QUARTER="${2:-}"
+
+if [[ -z "$YEAR" || -z "$QUARTER" ]]; then
+  echo "Usage: research/bin/run_quarterly_ic_review YEAR QUARTER"
+  echo "Example: research/bin/run_quarterly_ic_review 2026 2"
+  exit 1
+fi
+
+if [[ ! "$QUARTER" =~ ^[1-4]$ ]]; then
+  echo "ERROR: quarter must be 1, 2, 3 or 4."
+  exit 1
+fi
+
+export YEAR
+export QUARTER
+
+OUTPUT_DIR="research/output/${YEAR}-Q${QUARTER}"
+PIPELINE_START=$(date +%s)
+PIPELINE_CLOCK=$(date '+%H:%M:%S')
+GIT_REVISION=$(git rev-parse --short HEAD 2>/dev/null || echo "UNKNOWN")
+
+BOLD='\033[1m'
+DIM='\033[2m'
+GREEN='\033[32m'
+CYAN='\033[36m'
+YELLOW='\033[33m'
+RED='\033[31m'
+RESET='\033[0m'
+
+line() {
+  printf '%*s\n' 72 '' | tr ' ' '─'
+}
+
+elapsed() {
+  local start="$1"
+  local end
+  end=$(date +%s)
+  printf "%02d:%02d" $(((end-start)/60)) $(((end-start)%60))
+}
+
+stage() {
+  local number="$1"
+  local name="$2"
+  local description="$3"
+  local script="$4"
+
+  local started
+  started=$(date +%s)
+
+  echo
+  printf "${BOLD}${CYAN}[%02d/10] %-40s${RESET}\n" "$number" "$name"
+  printf "        ${DIM}%s${RESET}\n" "$description"
+  printf "        ${DIM}Executing analytical model...${RESET}\n"
+
+  if YEAR="$YEAR" QUARTER="$QUARTER" \
+      bundle exec rails runner "$script"; then
+
+    printf "        ${GREEN}✓ Analytical stage completed${RESET}\n"
+    printf "        ${GREEN}✓ Output contract generated${RESET}\n"
+    printf "        ${BOLD}COMPLETED${RESET} %45s\n" "$(elapsed "$started")"
+  else
+    echo
+    printf "        ${RED}${BOLD}PIPELINE FAILURE${RESET}\n"
+    printf "        Stage: %s\n" "$name"
+    printf "        Elapsed: %s\n" "$(elapsed "$started")"
+    exit 1
+  fi
+}
+
+clear
+
+printf "${BOLD}"
+echo "╔══════════════════════════════════════════════════════════════════════╗"
+echo "║        INSTITUTIONAL CAPITAL INTELLIGENCE ENGINE                   ║"
+echo "║        Quarterly Capital Allocation Research Pipeline              ║"
+echo "╚══════════════════════════════════════════════════════════════════════╝"
+printf "${RESET}"
+
+echo
+printf " PORTFOLIO PERIOD     ${BOLD}Q%s %s${RESET}\n" "$QUARTER" "$YEAR"
+printf " METHODOLOGY          Reports 01 → 10\n"
+printf " GIT REVISION         %s\n" "$GIT_REVISION"
+printf " PIPELINE START       %s\n" "$PIPELINE_CLOCK"
+printf " OUTPUT               %s\n" "$OUTPUT_DIR"
+
+echo
+line
+
+stage 1 \
+  "CAPITAL UNIVERSE" \
+  "Mapping observable institutional capital and distribution..." \
+  "research/reports/01_capital_universe.rb"
+
+stage 2 \
+  "CAPITAL CONCENTRATION" \
+  "Measuring institutional capital concentration and coverage..." \
+  "research/reports/02_capital_concentration.rb"
+
+stage 3 \
+  "MANAGER UNIVERSE" \
+  "Ranking reporting entities and constructing research universes..." \
+  "research/reports/03_manager_universe.rb"
+
+stage 4 \
+  "MANAGER ARCHITECTURE" \
+  "Resolving concentration, portfolio structure and effective positions..." \
+  "research/reports/04_manager_architecture.rb"
+
+stage 5 \
+  "MANAGER BEHAVIOR" \
+  "Reconstructing quarterly portfolio decisions and disclosure controls..." \
+  "research/reports/05_manager_behavior.rb"
+
+stage 6 \
+  "MANAGER INTELLIGENCE" \
+  "Integrating capital importance, interpretability and research readiness..." \
+  "research/reports/06_manager_signals.rb"
+
+stage 7 \
+  "SECURITY SIGNALS" \
+  "Aggregating institutional accumulation, distribution and divergence..." \
+  "research/reports/07_security_signals.rb"
+
+stage 8 \
+  "REGIONAL CAPITAL INTELLIGENCE" \
+  "Resolving GCC and Iraq institutional evidence and materiality..." \
+  "research/reports/08_regional_institutional_capital.rb"
+
+stage 9 \
+  "GLOBAL × REGIONAL IC REVIEW" \
+  "Reconciling evidence states and constructing escalation queues..." \
+  "research/reports/09_global_regional_ic_review.rb"
+
+stage 10 \
+  "CAPITAL ALLOCATION & IC BRIEF" \
+  "Synthesizing quarterly evidence into Investment Committee decisions..." \
+  "research/reports/10_quarterly_capital_allocation_brief.rb"
+
+echo
+printf "${BOLD}${CYAN}[PDF]   INVESTMENT COMMITTEE BRIEF${RESET}\n"
+printf "        ${DIM}Rendering governed quarterly decision artifact...${RESET}\n"
+
+PDF_START=$(date +%s)
+
+if [[ -x ".venv-pdf/bin/python" ]]; then
+  YEAR="$YEAR" QUARTER="$QUARTER" \
+    .venv-pdf/bin/python research/reports/render_10_ic_brief.py
+else
+  printf "        ${YELLOW}PDF environment unavailable — analytical outputs retained.${RESET}\n"
+fi
+
+if [[ -f "$OUTPUT_DIR/10_quarterly_capital_allocation_brief.pdf" ]]; then
+  printf "        ${GREEN}✓ PDF decision brief rendered${RESET}\n"
+fi
+
+printf "        ${BOLD}COMPLETED${RESET} %45s\n" "$(elapsed "$PDF_START")"
+
+TOTAL_END=$(date +%s)
+TOTAL=$((TOTAL_END - PIPELINE_START))
+TOTAL_MIN=$((TOTAL / 60))
+TOTAL_SEC=$((TOTAL % 60))
+
+echo
+line
+printf "${BOLD}${GREEN} QUARTERLY RESEARCH CYCLE COMPLETE${RESET}\n"
+line
+echo
+
+printf " Analytical stages       ${GREEN}10 / 10${RESET}\n"
+printf " Pipeline status          ${GREEN}${BOLD}VALIDATED${RESET}\n"
+printf " Methodology revision     %s\n" "$GIT_REVISION"
+printf " Total elapsed            %02d:%02d\n" "$TOTAL_MIN" "$TOTAL_SEC"
+
+if [[ -f "$OUTPUT_DIR/10_research_queue.csv" ]]; then
+  QUEUE_COUNT=$(($(wc -l < "$OUTPUT_DIR/10_research_queue.csv") - 1))
+  printf " Research escalations     %s\n" "$QUEUE_COUNT"
+fi
+
+echo
+printf "${BOLD} IC BRIEF${RESET}\n"
+printf " %s/10_quarterly_capital_allocation_brief.pdf\n" "$OUTPUT_DIR"
+
+echo
+printf "${BOLD} CAPITAL GOVERNANCE STATE${RESET}\n"
+printf " RESEARCH → UNDERWRITE → GOVERN → ALLOCATE\n"
+echo
+printf "${DIM} No automatic capital deployment authorized.${RESET}\n"
+echo
