@@ -100,3 +100,35 @@ Research-universe hierarchy:
 Capital importance must not be interpreted as investment signal quality.
 
 Holdings availability is explicitly distinguished from portfolio structure. A manager whose detailed holdings have not been materialised is NOT_LOADED rather than a zero-position portfolio.
+
+## Report 04 — Manager Architecture
+
+Research question:
+
+> How is each manager's observable 13F portfolio constructed?
+
+Run:
+
+    bundle exec rails runner research/reports/04_manager_architecture.rb YEAR QUARTER
+
+Example:
+
+    bundle exec rails runner research/reports/04_manager_architecture.rb 2026 2
+
+Report 04 requires detailed holdings to have been materialised locally.
+
+Measures include:
+
+- reported 13F value
+- long non-option value
+- long non-option / reported value
+- non-long reported value
+- position count
+- Top 1 / Top 5 / Top 10 / Top 20 concentration
+- portfolio HHI
+- effective positions
+- largest observable position
+
+Architecture is descriptive. It does not by itself establish investment conviction, manager skill or signal quality.
+
+Long non-option holdings are used as the primary architecture denominator to reduce distortion from options and other reported exposures.
