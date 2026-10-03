@@ -40,3 +40,29 @@ Outputs are written to:
     research/output/YEAR-QX/
 
 Reported 13F value should not be interpreted as total firm AUM.
+
+## Report 02 — Capital Concentration
+
+Research question:
+
+> How concentrated is observable institutional capital, and how many managers account for economically meaningful shares of it?
+
+Run:
+
+    bundle exec rails runner research/reports/02_capital_concentration.rb YEAR QUARTER
+
+Example:
+
+    bundle exec rails runner research/reports/02_capital_concentration.rb 2026 2
+
+Measures include:
+
+- capital controlled by top manager percentiles
+- managers required for 25%, 50%, 75%, 90%, 95% and 99% capital coverage
+- Top-N manager concentration
+- capital-distribution HHI
+- effective manager count
+
+The effective manager count represents the number of equally sized managers that would produce the observed HHI. It is a concentration statistic, not a literal count of independent institutions.
+
+Concentration is measured at the 13F reporting-entity level. Related reporting entities may belong to the same parent institution.
