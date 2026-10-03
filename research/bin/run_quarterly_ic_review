@@ -126,6 +126,84 @@ printf " AUDIT LOGS           %s\n" "$LOG_DIR"
 echo
 line
 
+# -------------------------------------------------------------------
+# PHASE 0 — DATA READINESS & CONTROL GATE
+# -------------------------------------------------------------------
+
+printf "${BOLD} PHASE 0 — DATA READINESS & CONTROL GATE${RESET}\n"
+printf "${DIM} Verifying analytical prerequisites before capital intelligence is generated.${RESET}\n"
+echo
+
+READINESS_START=$(date +%s)
+READINESS_LOG="${LOG_DIR}/00_data_readiness.log"
+
+printf "        Checking quarterly disclosure universe...\n"
+
+if bundle exec rails runner research/bin/check_quarter_readiness "$YEAR" "$QUARTER" \
+    >"$READINESS_LOG" 2>&1; then
+
+  CURRENT_FILINGS=$(grep '^current_filings=' "$READINESS_LOG" | cut -d= -f2)
+  VALUE_COVERAGE=$(grep '^reported_value_coverage_pct=' "$READINESS_LOG" | cut -d= -f2)
+  CURRENT_HOLDINGS=$(grep '^current_filings_with_holdings=' "$READINESS_LOG" | cut -d= -f2)
+  PREVIOUS_HOLDINGS=$(grep '^previous_filings_with_holdings=' "$READINESS_LOG" | cut -d= -f2)
+  CONFIDENTIAL=$(grep '^confidential_treatment_filings=' "$READINESS_LOG" | cut -d= -f2)
+
+  printf "        ${GREEN}✓${RESET} Quarterly filing universe detected"
+  [[ -n "$CURRENT_FILINGS" ]] && printf " (%s filings)" "$CURRENT_FILINGS"
+  printf "\n"
+
+  printf "        ${GREEN}✓${RESET} Reported-value coverage"
+  [[ -n "$VALUE_COVERAGE" ]] && printf " %s%%" "$VALUE_COVERAGE"
+  printf "\n"
+
+  printf "        ${GREEN}✓${RESET} Current-quarter holdings evidence available"
+  [[ -n "$CURRENT_HOLDINGS" ]] && printf " (%s filings)" "$CURRENT_HOLDINGS"
+  printf "\n"
+
+  printf "        ${GREEN}✓${RESET} Prior-quarter comparison evidence available"
+  [[ -n "$PREVIOUS_HOLDINGS" ]] && printf " (%s filings)" "$PREVIOUS_HOLDINGS"
+  printf "\n"
+
+  if [[ -n "$CONFIDENTIAL" && "$CONFIDENTIAL" != "0" ]]; then
+    printf "        ${YELLOW}⚠${RESET} Confidential-treatment disclosures identified (%s)\n" "$CONFIDENTIAL"
+    printf "          ${DIM}Retained for downstream disclosure-quality controls.${RESET}\n"
+  else
+    printf "        ${GREEN}✓${RESET} No confidential-treatment disclosures identified\n"
+  fi
+
+  READINESS_SECONDS=$(elapsed_seconds "$READINESS_START")
+
+  printf "\n"
+  printf "        ${GREEN}${BOLD}DATA READINESS GATE: PASSED${RESET}\n"
+  printf "        ${DIM}Audit log: %s${RESET}\n" "$READINESS_LOG"
+  printf "        ${BOLD}${GREEN}COMPLETED${RESET} %44s\n" "$(format_elapsed "$READINESS_SECONDS")"
+
+else
+  READINESS_SECONDS=$(elapsed_seconds "$READINESS_START")
+  FAILURE_REASON=$(grep '^failure_reason=' "$READINESS_LOG" | cut -d= -f2 || true)
+
+  printf "\n"
+  printf "        ${RED}${BOLD}DATA READINESS GATE: FAILED${RESET}\n"
+
+  if [[ -n "$FAILURE_REASON" ]]; then
+    printf "        Control exception: %s\n" "$FAILURE_REASON"
+  fi
+
+  printf "        Portfolio period: Q%s %s\n" "$QUARTER" "$YEAR"
+  printf "        Audit log: %s\n" "$READINESS_LOG"
+  printf "        Elapsed: %s\n" "$(format_elapsed "$READINESS_SECONDS")"
+
+  echo
+  printf "${YELLOW} ANALYTICAL PIPELINE NOT STARTED${RESET}\n"
+  printf " The requested quarter has not passed the minimum data-readiness controls.\n"
+  printf " Prepare or acquire the required SEC data before running institutional analytics.\n"
+  echo
+  exit 1
+fi
+
+echo
+line
+
 printf "${BOLD} PHASE I — INSTITUTIONAL CAPITAL ANALYTICS${RESET}\n"
 printf "${DIM} Building the observable capital and manager evidence base.${RESET}\n"
 
