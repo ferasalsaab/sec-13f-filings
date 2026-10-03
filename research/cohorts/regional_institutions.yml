@@ -1,0 +1,140 @@
+regions:
+
+  GCC:
+
+    Saudi Arabia:
+
+      - institution: Public Investment Fund
+        manager_name: PUBLIC INVESTMENT FUND
+        cik: "0001767640"
+        institution_type: sovereign_wealth_fund
+        disclosure_scope: 13F_MANAGER
+        holdings_status: Q1_Q2_LOADED
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+      - institution: Saudi Central Bank
+        manager_name: Saudi Central Bank
+        cik: "0001918181"
+        institution_type: central_bank
+        disclosure_scope: 13F_MANAGER
+        holdings_status: Q1_Q2_LOADED
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+      - institution: Saudi Electronic Games Holding Co
+        manager_name: Saudi Electronic Games Holding Co
+        cik: "0002100727"
+        institution_type: sovereign_linked_strategic_vehicle
+        disclosure_scope: 13F_MANAGER
+        holdings_status: Q1_Q2_LOADED
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+    United Arab Emirates:
+
+      - institution: Mubadala Investment Company
+        manager_name: Mubadala Investment Co PJSC
+        cik: "0001704268"
+        institution_type: sovereign_investment_company
+        disclosure_scope: 13F_MANAGER
+        holdings_status: Q1_Q2_LOADED
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+      - institution: Abu Dhabi Investment Council
+        manager_name: Abu Dhabi Investment Council Co P.J.S.C
+        cik: "0001814011"
+        institution_type: sovereign_investment_institution
+        disclosure_scope: 13F_MANAGER
+        holdings_status: Q1_Q2_LOADED
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+      - institution: Lunate Capital
+        manager_name: Lunate Capital Ltd
+        cik: "0002056786"
+        institution_type: investment_manager
+        disclosure_scope: 13F_MANAGER
+        holdings_status: Q1_Q2_LOADED
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+      - institution: Abu Dhabi Investment Authority
+        institution_type: sovereign_wealth_fund
+        disclosure_scope: SEC_OTHER
+        sec_forms:
+          - SCHEDULE_13G
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+      - institution: ADQ
+        legal_name: Abu Dhabi Developmental Holding Company PJSC
+        institution_type: sovereign_investment_company
+        disclosure_scope: SEC_OTHER
+        sec_forms:
+          - SCHEDULE_13D
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+    Qatar:
+
+      - institution: Qatar Investment Authority
+        cik: "0001441449"
+        institution_type: sovereign_wealth_fund
+        disclosure_scope: SEC_OTHER
+        sec_forms:
+          - SCHEDULE_13D
+          - SCHEDULE_13G
+        related_entities:
+          - Qatar Holding LLC
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+    Kuwait:
+
+      - institution: Kuwait Investment Authority
+        cik: "0000933491"
+        institution_type: sovereign_wealth_fund
+        disclosure_scope: SEC_OTHER
+        sec_forms:
+          - SCHEDULE_13G
+        research_priority: CORE
+        identity_status: CONFIRMED
+
+    Bahrain:
+
+      - institution: Bahrain Mumtalakat Holding Company
+        institution_type: sovereign_wealth_fund
+        disclosure_scope: RESEARCH_ONLY
+        research_priority: SECONDARY
+        identity_status: CONFIRMED
+        notes: >
+          SEC-visible through investee/company disclosures.
+          No comparable current direct 13F/13D/13G portfolio established yet.
+
+    Oman:
+
+      - institution: Oman Investment Authority
+        institution_type: sovereign_investment_authority
+        disclosure_scope: SEC_OTHER
+        research_priority: SECONDARY
+        identity_status: CONFIRMED
+        notes: >
+          SEC-visible ownership evidence exists, including positions
+          managed through external investment advisers. Do not treat
+          these disclosures as a complete OIA portfolio.
+
+  IRAQ:
+
+    Iraq:
+
+      - institution: Iraqi institutional capital universe
+        institution_type: unresolved
+        disclosure_scope: RESEARCH_ONLY
+        research_priority: DISCOVERY
+        identity_status: UNRESOLVED
+        notes: >
+          No qualifying sovereign/institutional 13F manager identified.
+          Do not equate historical Development Fund for Iraq references
+          with a current sovereign investment portfolio.

@@ -132,3 +132,36 @@ Measures include:
 Architecture is descriptive. It does not by itself establish investment conviction, manager skill or signal quality.
 
 Long non-option holdings are used as the primary architecture denominator to reduce distortion from options and other reported exposures.
+
+## Report 08 — Regional Institutional Capital
+
+`08_regional_institutional_capital.rb`
+
+Builds a GCC + Iraq institutional-capital intelligence layer.
+
+The report separates:
+
+- regional 13F portfolio managers with observable holdings;
+- other SEC-visible strategic ownership;
+- important regional institutions without a qualifying 13F portfolio;
+- unresolved institutional-capital universes requiring further discovery.
+
+Core outputs include country-level observable 13F capital, portfolio architecture,
+QoQ behavior using security units rather than market values, and cross-institution
+security alignment with decision materiality.
+
+Security identity uses CUSIP as the primary identifier, with option type and
+share/principal-amount type retained where economically relevant. Descriptive
+class-title changes are not treated as security changes.
+
+Important limitations:
+
+- 13F value is not total institution AUM.
+- QoQ reported-value change is not investment performance.
+- 13F captures only the observable reportable portfolio.
+- Strategic holdings and diversified portfolios should not be interpreted identically.
+- Regional security alignment measures evidence within the identified reporting cohort,
+  not the entire GCC institutional-capital universe.
+- Combined security weight is the sum of participating managers' individual portfolio
+  weights and is not a regional portfolio weight.
+- 13D/13G and other SEC disclosures remain analytically separate from 13F portfolio data.
