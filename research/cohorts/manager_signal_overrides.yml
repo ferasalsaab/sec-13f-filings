@@ -1,0 +1,158 @@
+# Manager Signal Overrides
+# ========================
+#
+# Purpose:
+# Curated institutional classifications for managers where mandate context
+# cannot be inferred reliably from 13F mathematics alone.
+#
+# This file is NOT the manager universe.
+# Report 06 covers the full 13F universe automatically.
+#
+# These entries override or enrich automated classifications.
+# Managers absent from this file remain UNCLASSIFIED where institutional
+# context cannot be established reliably.
+#
+# Never interpret UNCLASSIFIED as LOW quality.
+# This file does NOT rank managers.
+
+managers:
+
+  "BERKSHIRE HATHAWAY INC":
+    archetype: "Concentrated Fundamental"
+    interpretability: "HIGH"
+    signal_use: "Fundamental security conviction"
+
+  "TCI Fund Management Ltd":
+    archetype: "Concentrated Fundamental"
+    interpretability: "HIGH"
+    signal_use: "Fundamental security conviction"
+
+  "PERSHING SQUARE INC.":
+    archetype: "Concentrated Fundamental"
+    interpretability: "MEDIUM"
+    signal_use: "Fundamental conviction; disclosure-quality caution"
+
+  "GENERATION INVESTMENT MANAGEMENT LLP":
+    archetype: "Fundamental Active"
+    interpretability: "HIGH"
+    signal_use: "Fundamental security conviction"
+
+  "DODGE & COX":
+    archetype: "Fundamental Active"
+    interpretability: "HIGH"
+    signal_use: "Long-horizon fundamental allocation"
+
+  "PRIMECAP MANAGEMENT CO/CA/":
+    archetype: "Fundamental Active"
+    interpretability: "HIGH"
+    signal_use: "Long-horizon fundamental allocation"
+
+  "BAILLIE GIFFORD & CO":
+    archetype: "Fundamental Active"
+    interpretability: "HIGH"
+    signal_use: "Long-duration growth allocation"
+
+  "Capital World Investors":
+    archetype: "Diversified Active"
+    interpretability: "MEDIUM"
+    signal_use: "Large-scale active institutional allocation"
+
+  "Capital Research Global Investors":
+    archetype: "Diversified Active"
+    interpretability: "MEDIUM"
+    signal_use: "Large-scale active institutional allocation"
+
+  "WELLINGTON MANAGEMENT GROUP LLP":
+    archetype: "Diversified Active"
+    interpretability: "MEDIUM"
+    signal_use: "Institutional active allocation"
+
+  "AQR CAPITAL MANAGEMENT LLC":
+    archetype: "Systematic / Quantitative"
+    interpretability: "MEDIUM"
+    signal_use: "Systematic factor and cross-sectional positioning"
+
+  "TWO SIGMA INVESTMENTS, LP":
+    archetype: "Systematic / Quantitative"
+    interpretability: "LOW"
+    signal_use: "Systematic positioning; weak standalone conviction signal"
+
+  "MILLENNIUM MANAGEMENT LLC":
+    archetype: "Multi-Strategy"
+    interpretability: "LOW"
+    signal_use: "Positioning and trading activity; not standalone conviction"
+
+  "CITADEL ADVISORS LLC":
+    archetype: "Multi-Strategy / Trading"
+    interpretability: "LOW"
+    signal_use: "Market positioning; not standalone fundamental conviction"
+
+  "JANE STREET GROUP, LLC":
+    archetype: "Market Maker / Trading"
+    interpretability: "LOW"
+    signal_use: "Market structure and positioning"
+
+  "Point72 Asset Management, L.P.":
+    archetype: "Multi-Strategy"
+    interpretability: "MEDIUM"
+    signal_use: "Active positioning with mandate context required"
+
+  "D. E. Shaw & Co., Inc.":
+    archetype: "Systematic / Multi-Strategy"
+    interpretability: "LOW"
+    signal_use: "Systematic positioning and portfolio breadth"
+
+  "BLACKROCK, INC.":
+    archetype: "Passive / Institutional"
+    interpretability: "LOW"
+    signal_use: "Institutional ownership and capital-flow architecture"
+
+  "BlackRock, Inc.":
+    archetype: "Passive / Institutional"
+    interpretability: "LOW"
+    signal_use: "Institutional ownership and capital-flow architecture"
+
+  "STATE STREET CORP":
+    archetype: "Passive / Institutional"
+    interpretability: "LOW"
+    signal_use: "Institutional ownership and capital-flow architecture"
+
+  "GEODE CAPITAL MANAGEMENT, LLC":
+    archetype: "Passive / Index"
+    interpretability: "LOW"
+    signal_use: "Index ownership and broad institutional positioning"
+
+  "DIMENSIONAL FUND ADVISORS LP":
+    archetype: "Systematic / Factor"
+    interpretability: "MEDIUM"
+    signal_use: "Systematic factor allocation"
+
+  "NORGES BANK":
+    archetype: "Asset Owner / SWF"
+    interpretability: "MEDIUM"
+    signal_use: "Sovereign public-equity allocation"
+
+  "CANADA PENSION PLAN INVESTMENT BOARD":
+    archetype: "Asset Owner / Pension"
+    interpretability: "MEDIUM"
+    signal_use: "Institutional asset-owner allocation"
+
+  "CALIFORNIA PUBLIC EMPLOYEES RETIREMENT SYSTEM":
+    archetype: "Asset Owner / Pension"
+    interpretability: "MEDIUM"
+    signal_use: "Institutional asset-owner allocation"
+
+  "PUBLIC INVESTMENT FUND":
+    archetype: "Asset Owner / SWF"
+    interpretability: "MEDIUM"
+    signal_use: "Sovereign strategic public-equity allocation"
+
+  "GATES FOUNDATION TRUST":
+    archetype: "Foundation / Endowment"
+    interpretability: "HIGH"
+    signal_use: "Concentrated long-horizon allocation"
+
+  "TIGER GLOBAL MANAGEMENT LLC":
+    archetype: "Fundamental / Growth"
+    interpretability: "HIGH"
+    signal_use: "Growth-equity security conviction"
