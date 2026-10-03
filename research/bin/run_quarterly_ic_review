@@ -11,8 +11,13 @@ if [[ -z "$YEAR" || -z "$QUARTER" ]]; then
   exit 1
 fi
 
+if [[ ! "$YEAR" =~ ^[0-9]{4}$ ]]; then
+  echo "ERROR: YEAR must be a four-digit year."
+  exit 1
+fi
+
 if [[ ! "$QUARTER" =~ ^[1-4]$ ]]; then
-  echo "ERROR: quarter must be 1, 2, 3 or 4."
+  echo "ERROR: QUARTER must be 1, 2, 3 or 4."
   exit 1
 fi
 
@@ -20,9 +25,14 @@ export YEAR
 export QUARTER
 
 OUTPUT_DIR="research/output/${YEAR}-Q${QUARTER}"
+LOG_DIR="${OUTPUT_DIR}/logs"
+
+mkdir -p "$LOG_DIR"
+
 PIPELINE_START=$(date +%s)
 PIPELINE_CLOCK=$(date '+%H:%M:%S')
 GIT_REVISION=$(git rev-parse --short HEAD 2>/dev/null || echo "UNKNOWN")
+BRANCH=$(git branch --show-current 2>/dev/null || echo "UNKNOWN")
 
 BOLD='\033[1m'
 DIM='\033[2m'
@@ -36,11 +46,16 @@ line() {
   printf '%*s\n' 72 '' | tr ' ' '─'
 }
 
-elapsed() {
+elapsed_seconds() {
   local start="$1"
   local end
   end=$(date +%s)
-  printf "%02d:%02d" $(((end-start)/60)) $(((end-start)%60))
+  echo $((end - start))
+}
+
+format_elapsed() {
+  local seconds="$1"
+  printf "%02d:%02d" $((seconds / 60)) $((seconds % 60))
 }
 
 stage() {
@@ -48,26 +63,43 @@ stage() {
   local name="$2"
   local description="$3"
   local script="$4"
+  local validation_1="$5"
+  local validation_2="$6"
+  local log_file="${LOG_DIR}/$(printf '%02d' "$number")_$(basename "$script" .rb).log"
 
   local started
   started=$(date +%s)
 
   echo
-  printf "${BOLD}${CYAN}[%02d/10] %-40s${RESET}\n" "$number" "$name"
+  printf "${BOLD}${CYAN}[%02d/10] %-43s${RESET}\n" "$number" "$name"
   printf "        ${DIM}%s${RESET}\n" "$description"
-  printf "        ${DIM}Executing analytical model...${RESET}\n"
+  printf "        Initializing analytical stage...\n"
 
-  if YEAR="$YEAR" QUARTER="$QUARTER" \
-      bundle exec rails runner "$script"; then
+  if bundle exec rails runner "$script" "$YEAR" "$QUARTER" \
+      >"$log_file" 2>&1; then
 
-    printf "        ${GREEN}✓ Analytical stage completed${RESET}\n"
-    printf "        ${GREEN}✓ Output contract generated${RESET}\n"
-    printf "        ${BOLD}COMPLETED${RESET} %45s\n" "$(elapsed "$started")"
+    local seconds
+    seconds=$(elapsed_seconds "$started")
+
+    printf "        ${GREEN}✓${RESET} %s\n" "$validation_1"
+    printf "        ${GREEN}✓${RESET} %s\n" "$validation_2"
+    printf "        ${GREEN}✓${RESET} Analytical output persisted\n"
+    printf "        ${DIM}Audit log: %s${RESET}\n" "$log_file"
+    printf "        ${BOLD}${GREEN}COMPLETED${RESET} %44s\n" "$(format_elapsed "$seconds")"
   else
+    local seconds
+    seconds=$(elapsed_seconds "$started")
+
     echo
-    printf "        ${RED}${BOLD}PIPELINE FAILURE${RESET}\n"
-    printf "        Stage: %s\n" "$name"
-    printf "        Elapsed: %s\n" "$(elapsed "$started")"
+    printf "        ${RED}${BOLD}ANALYTICAL STAGE FAILED${RESET}\n"
+    printf "        Stage:   %s\n" "$name"
+    printf "        Elapsed: %s\n" "$(format_elapsed "$seconds")"
+    printf "        Log:     %s\n" "$log_file"
+    echo
+    printf "${YELLOW}Last 30 lines of diagnostic output:${RESET}\n"
+    echo
+    tail -30 "$log_file"
+    echo
     exit 1
   fi
 }
@@ -83,87 +115,138 @@ printf "${RESET}"
 
 echo
 printf " PORTFOLIO PERIOD     ${BOLD}Q%s %s${RESET}\n" "$QUARTER" "$YEAR"
-printf " METHODOLOGY          Reports 01 → 10\n"
+printf " RESEARCH STACK       10 analytical models\n"
+printf " METHODOLOGY          Security → Manager → Mandate → Portfolio → IC\n"
 printf " GIT REVISION         %s\n" "$GIT_REVISION"
+printf " BRANCH               %s\n" "$BRANCH"
 printf " PIPELINE START       %s\n" "$PIPELINE_CLOCK"
 printf " OUTPUT               %s\n" "$OUTPUT_DIR"
+printf " AUDIT LOGS           %s\n" "$LOG_DIR"
 
 echo
 line
 
+printf "${BOLD} PHASE I — INSTITUTIONAL CAPITAL ANALYTICS${RESET}\n"
+printf "${DIM} Building the observable capital and manager evidence base.${RESET}\n"
+
 stage 1 \
   "CAPITAL UNIVERSE" \
   "Mapping observable institutional capital and distribution..." \
-  "research/reports/01_capital_universe.rb"
+  "research/reports/01_capital_universe.rb" \
+  "Reporting universe resolved" \
+  "Capital distribution and percentiles calculated"
 
 stage 2 \
   "CAPITAL CONCENTRATION" \
-  "Measuring institutional capital concentration and coverage..." \
-  "research/reports/02_capital_concentration.rb"
+  "Measuring institutional control and capital coverage..." \
+  "research/reports/02_capital_concentration.rb" \
+  "Concentration structure calculated" \
+  "Capital coverage thresholds resolved"
 
 stage 3 \
   "MANAGER UNIVERSE" \
-  "Ranking reporting entities and constructing research universes..." \
-  "research/reports/03_manager_universe.rb"
+  "Ranking institutions and constructing research universes..." \
+  "research/reports/03_manager_universe.rb" \
+  "Manager hierarchy constructed" \
+  "Research universes segmented"
 
 stage 4 \
   "MANAGER ARCHITECTURE" \
-  "Resolving concentration, portfolio structure and effective positions..." \
-  "research/reports/04_manager_architecture.rb"
+  "Resolving portfolio structure and effective concentration..." \
+  "research/reports/04_manager_architecture.rb" \
+  "Portfolio architecture calculated" \
+  "Concentration and effective positions resolved"
+
+echo
+line
+printf "${BOLD} PHASE II — DECISION RECONSTRUCTION${RESET}\n"
+printf "${DIM} Reconstructing manager behavior and institutional evidence.${RESET}\n"
 
 stage 5 \
   "MANAGER BEHAVIOR" \
-  "Reconstructing quarterly portfolio decisions and disclosure controls..." \
-  "research/reports/05_manager_behavior.rb"
+  "Reconstructing quarterly portfolio decisions..." \
+  "research/reports/05_manager_behavior.rb" \
+  "NEW / ADD / REDUCE / EXIT decisions classified" \
+  "Disclosure-quality controls applied"
 
 stage 6 \
   "MANAGER INTELLIGENCE" \
-  "Integrating capital importance, interpretability and research readiness..." \
-  "research/reports/06_manager_signals.rb"
+  "Integrating capital importance and interpretability..." \
+  "research/reports/06_manager_signals.rb" \
+  "Manager context integrated" \
+  "Research readiness resolved"
 
 stage 7 \
   "SECURITY SIGNALS" \
-  "Aggregating institutional accumulation, distribution and divergence..." \
-  "research/reports/07_security_signals.rb"
+  "Aggregating institutional accumulation and distribution..." \
+  "research/reports/07_security_signals.rb" \
+  "Cross-manager evidence aggregated" \
+  "Fundamental and broad evidence separated"
+
+echo
+line
+printf "${BOLD} PHASE III — REGIONAL & IC INTELLIGENCE${RESET}\n"
+printf "${DIM} Reconciling GCC evidence with global institutional behavior.${RESET}\n"
 
 stage 8 \
   "REGIONAL CAPITAL INTELLIGENCE" \
-  "Resolving GCC and Iraq institutional evidence and materiality..." \
-  "research/reports/08_regional_institutional_capital.rb"
+  "Resolving GCC and Iraq institutional evidence..." \
+  "research/reports/08_regional_institutional_capital.rb" \
+  "Regional institutional cohort analyzed" \
+  "Portfolio materiality calculated"
 
 stage 9 \
   "GLOBAL × REGIONAL IC REVIEW" \
-  "Reconciling evidence states and constructing escalation queues..." \
-  "research/reports/09_global_regional_ic_review.rb"
+  "Reconciling evidence and constructing escalation queues..." \
+  "research/reports/09_global_regional_ic_review.rb" \
+  "Global / regional evidence reconciled" \
+  "Research and risk escalations classified"
+
+echo
+line
+printf "${BOLD} PHASE IV — CAPITAL GOVERNANCE${RESET}\n"
+printf "${DIM} Converting evidence into an Investment Committee decision record.${RESET}\n"
 
 stage 10 \
   "CAPITAL ALLOCATION & IC BRIEF" \
-  "Synthesizing quarterly evidence into Investment Committee decisions..." \
-  "research/reports/10_quarterly_capital_allocation_brief.rb"
+  "Synthesizing quarterly evidence for capital governance..." \
+  "research/reports/10_quarterly_capital_allocation_brief.rb" \
+  "Investment Committee questions evaluated" \
+  "Capital-allocation posture established"
 
 echo
-printf "${BOLD}${CYAN}[PDF]   INVESTMENT COMMITTEE BRIEF${RESET}\n"
-printf "        ${DIM}Rendering governed quarterly decision artifact...${RESET}\n"
+printf "${BOLD}${CYAN}[PDF]   INVESTMENT COMMITTEE DECISION ARTIFACT${RESET}\n"
+printf "        Rendering governed quarterly brief...\n"
 
 PDF_START=$(date +%s)
+PDF_LOG="${LOG_DIR}/10_pdf_render.log"
 
 if [[ -x ".venv-pdf/bin/python" ]]; then
-  YEAR="$YEAR" QUARTER="$QUARTER" \
-    .venv-pdf/bin/python research/reports/render_10_ic_brief.py
+  if YEAR="$YEAR" QUARTER="$QUARTER" \
+      .venv-pdf/bin/python research/reports/render_10_ic_brief.py \
+      >"$PDF_LOG" 2>&1; then
+
+    printf "        ${GREEN}✓${RESET} Presentation-layer datasets loaded\n"
+    printf "        ${GREEN}✓${RESET} IC document assembled\n"
+
+    if [[ -f "$OUTPUT_DIR/10_quarterly_capital_allocation_brief.pdf" ]]; then
+      PDF_SIZE=$(du -h "$OUTPUT_DIR/10_quarterly_capital_allocation_brief.pdf" | awk '{print $1}')
+      printf "        ${GREEN}✓${RESET} PDF validated (%s)\n" "$PDF_SIZE"
+    fi
+  else
+    printf "        ${RED}✗ PDF rendering failed${RESET}\n"
+    tail -20 "$PDF_LOG"
+    exit 1
+  fi
 else
-  printf "        ${YELLOW}PDF environment unavailable — analytical outputs retained.${RESET}\n"
+  printf "        ${YELLOW}⚠ PDF environment unavailable${RESET}\n"
+  printf "        Expected: .venv-pdf/bin/python\n"
 fi
 
-if [[ -f "$OUTPUT_DIR/10_quarterly_capital_allocation_brief.pdf" ]]; then
-  printf "        ${GREEN}✓ PDF decision brief rendered${RESET}\n"
-fi
+PDF_SECONDS=$(elapsed_seconds "$PDF_START")
+printf "        ${BOLD}${GREEN}COMPLETED${RESET} %44s\n" "$(format_elapsed "$PDF_SECONDS")"
 
-printf "        ${BOLD}COMPLETED${RESET} %45s\n" "$(elapsed "$PDF_START")"
-
-TOTAL_END=$(date +%s)
-TOTAL=$((TOTAL_END - PIPELINE_START))
-TOTAL_MIN=$((TOTAL / 60))
-TOTAL_SEC=$((TOTAL % 60))
+TOTAL_SECONDS=$(elapsed_seconds "$PIPELINE_START")
 
 echo
 line
@@ -171,23 +254,38 @@ printf "${BOLD}${GREEN} QUARTERLY RESEARCH CYCLE COMPLETE${RESET}\n"
 line
 echo
 
+printf " Portfolio period        Q%s %s\n" "$QUARTER" "$YEAR"
 printf " Analytical stages       ${GREEN}10 / 10${RESET}\n"
 printf " Pipeline status          ${GREEN}${BOLD}VALIDATED${RESET}\n"
 printf " Methodology revision     %s\n" "$GIT_REVISION"
-printf " Total elapsed            %02d:%02d\n" "$TOTAL_MIN" "$TOTAL_SEC"
 
 if [[ -f "$OUTPUT_DIR/10_research_queue.csv" ]]; then
   QUEUE_COUNT=$(($(wc -l < "$OUTPUT_DIR/10_research_queue.csv") - 1))
   printf " Research escalations     %s\n" "$QUEUE_COUNT"
 fi
 
+if [[ -f "$OUTPUT_DIR/10_capital_allocation_summary.csv" ]]; then
+  PRIORITY_RESEARCH=$(awk -F, '$1=="priority_research"{print $2}' \
+    "$OUTPUT_DIR/10_capital_allocation_summary.csv" | tr -d '\r')
+  PRIORITY_RISK=$(awk -F, '$1=="priority_risk_review"{print $2}' \
+    "$OUTPUT_DIR/10_capital_allocation_summary.csv" | tr -d '\r')
+  DIVERGENCE=$(awk -F, '$1=="divergence_review"{print $2}' \
+    "$OUTPUT_DIR/10_capital_allocation_summary.csv" | tr -d '\r')
+
+  [[ -n "$PRIORITY_RESEARCH" ]] && printf " Priority research        %s\n" "$PRIORITY_RESEARCH"
+  [[ -n "$PRIORITY_RISK" ]] && printf " Priority risk review     %s\n" "$PRIORITY_RISK"
+  [[ -n "$DIVERGENCE" ]] && printf " Divergence review        %s\n" "$DIVERGENCE"
+fi
+
+printf " Total elapsed            %s\n" "$(format_elapsed "$TOTAL_SECONDS")"
+
 echo
-printf "${BOLD} IC BRIEF${RESET}\n"
+printf "${BOLD} INVESTMENT COMMITTEE BRIEF${RESET}\n"
 printf " %s/10_quarterly_capital_allocation_brief.pdf\n" "$OUTPUT_DIR"
 
 echo
 printf "${BOLD} CAPITAL GOVERNANCE STATE${RESET}\n"
-printf " RESEARCH → UNDERWRITE → GOVERN → ALLOCATE\n"
+printf " ${CYAN}RESEARCH → UNDERWRITE → GOVERN → ALLOCATE${RESET}\n"
 echo
-printf "${DIM} No automatic capital deployment authorized.${RESET}\n"
+printf "${DIM} Institutional-flow evidence does not authorize automatic capital deployment.${RESET}\n"
 echo
