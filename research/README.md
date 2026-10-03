@@ -165,3 +165,39 @@ Important limitations:
 - Combined security weight is the sum of participating managers' individual portfolio
   weights and is not a regional portfolio weight.
 - 13D/13G and other SEC disclosures remain analytically separate from 13F portfolio data.
+
+## Report 09 — Global & Regional Institutional Capital Review
+
+`09_global_regional_ic_review.rb`
+
+Synthesizes the research stack into a quarterly investment-committee research view.
+
+The report combines:
+
+- global reported 13F capital structure and concentration;
+- manager intelligence and disclosure quality;
+- quarterly manager behavior;
+- global security-level institutional evidence;
+- GCC and Iraq institutional-capital intelligence;
+- global versus regional security alignment;
+- evidence escalation for further research;
+- capital-allocation and downside-review questions.
+
+Evidence escalation is deliberately separate from evidence classification.
+
+Material regional/global divergences are escalated for review, while non-material
+differences remain preserved in the underlying analytical output without automatically
+entering the investment-committee queue.
+
+Escalation categories are research workflow states, not investment recommendations.
+
+Important limitations:
+
+- 13F reported value is not institution AUM.
+- Reported portfolio-value changes are not investment performance.
+- 13F disclosures are delayed and incomplete representations of economic exposure.
+- Manager mandate and portfolio architecture must precede conviction inference.
+- Regional evidence represents the identified reporting cohort, not the entire GCC or Iraqi institutional-capital universe.
+- Strategic ownership must be distinguished from diversified portfolio-manager behavior.
+- Cross-market agreement or divergence is evidence for further research, not a buy or sell signal.
+- Performance and persistence require subsequent-quarter observation and are not inferred from a single reporting period.
